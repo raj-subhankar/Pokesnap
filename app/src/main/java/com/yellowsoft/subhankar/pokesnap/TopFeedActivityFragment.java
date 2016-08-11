@@ -2,6 +2,7 @@ package com.yellowsoft.subhankar.pokesnap;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,6 +26,7 @@ public class TopFeedActivityFragment extends Fragment {
     private RecyclerView recyclerView;
     private FeedAdapter mAdapter;
     private String token;
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
     private static final String TAG = TopFeedActivityFragment.class.getSimpleName();
 
@@ -36,19 +38,15 @@ public class TopFeedActivityFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         session = new SessionManager(getContext());
+        token = session.getToken();
 
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
-
-        Log.d(TAG, "Before Call");
-
-        token = session.getToken();
 
         Call<List<Post>> call = apiService.getTopposts(token);
         call.enqueue(new Callback<List<Post>>() {
             @Override
             public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
-                //Log.d(TAG, "Number of movies received: " + response.body().toString());
 
                 if(!response.body().isEmpty()) {
                     for (int i = 0; i < response.body().size(); i++) {
@@ -56,7 +54,6 @@ public class TopFeedActivityFragment extends Fragment {
                         posts.add(post);
                         Log.d(TAG, "Number of movies received: " + post);
                     }
-//                Post post = response.body().get(0).getPostBody();
                     Log.d(TAG, "Number of movies received: " + posts.get(0).getPostBody());
                     mAdapter = new FeedAdapter(getContext(), posts);
                     recyclerView.setAdapter(mAdapter);
@@ -78,9 +75,19 @@ public class TopFeedActivityFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_feed, container, false);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler);
 
+        mSwipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresh_layout);
+
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                // Refresh items
+                loadDataFromApi();
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
+        });
+
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
 
-//        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext());
         recyclerView.setLayoutManager(linearLayoutManager);
 
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(linearLayoutManager) {
@@ -88,7 +95,6 @@ public class TopFeedActivityFragment extends Fragment {
             public void onLoadMore(int page, int totalItemsCount) {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
-//                customLoadMoreDataFromApi(page);
                 int curSize = mAdapter.getItemCount();
                 customLoadMoreDataFromApi(posts.get(curSize - 1).get_id().toString());
             }
@@ -96,6 +102,35 @@ public class TopFeedActivityFragment extends Fragment {
 
 
         return view;
+    }
+
+
+    public void loadDataFromApi() {
+
+        ApiInterface apiService =
+                ApiClient.getClient().create(ApiInterface.class);
+
+        token = session.getToken();
+
+        Call<List<Post>> call = apiService.getTopposts(token);
+        call.enqueue(new Callback<List<Post>>() {
+            @Override
+            public void onResponse(Call<List<Post>> call, Response<List<Post>> response) {
+
+                if (!response.body().isEmpty()) {
+                    posts.clear();
+                    posts.addAll(response.body());
+                    mAdapter.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Post>> call, Throwable t) {
+                // Log error here since request failed
+                Log.e(TAG, t.toString());
+            }
+        });
+
     }
 
     public void customLoadMoreDataFromApi(String lastid) {
@@ -115,12 +150,13 @@ public class TopFeedActivityFragment extends Fragment {
 //                        posts.add(post);
 //                    }
                     posts.addAll(response.body());
+
                     int currSize = mAdapter.getItemCount();
 //                Post post = response.body().get(0).getPostBody();
                     //mAdapter = new FeedAdapter(getContext(), posts);
                     //recyclerView.setAdapter(mAdapter);
-//                    mAdapter.notifyItemInserted(posts.size()-1);
                     mAdapter.notifyItemRangeInserted(currSize, posts.size()-1);
+//                    mAdapter.notifyDataSetChanged();
                 }
 
             }
