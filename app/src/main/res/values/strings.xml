@@ -17,4 +17,5 @@
         <item quantity="one">%d like</item>
         <item quantity="other">%d likes</item>
     </plurals>
+    <string name="title_activity_likers">LikersActivity</string>
 </resources>
