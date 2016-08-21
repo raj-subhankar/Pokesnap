@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.squareup.picasso.OkHttpDownloader;
 import com.squareup.picasso.Picasso;
 
@@ -71,6 +73,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
         MyViewHolder myViewHolder = new MyViewHolder(itemView);
         myViewHolder.btnLike.setOnClickListener(this);
         myViewHolder.userName.setOnClickListener(this);
+        myViewHolder.likesCounter.setOnClickListener(this);
 
         // Session manager
         session = new SessionManager(context);
@@ -94,6 +97,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
         }
 //        Picasso.with(context).load(post.getImageUrl()).into(holder.imageFeedItem);
         if(post.getImageUrl() != "") {
+//            Glide.with(context).load(post.getImageUrl())
+//                    .thumbnail(0.5f)
+//                    .crossFade()
+//                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+//                    .into(holder.imageFeedItem);
             Picasso.with(context).load(post.getImageUrl()).resize(320
                     , 0).into(holder.imageFeedItem);
         } else {
@@ -104,6 +112,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
                 R.plurals.likes_count, post.getLikesCount(), post.getLikesCount()
         );
         holder.likesCounter.setText(likesCountText);
+        holder.likesCounter.setTag(holder);
         likesCount.put(position, post.getLikesCount());
         holder.btnLike.setTag(holder);
         if(post.getLikes().contains(user)) {
@@ -159,6 +168,11 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
                     UserProfileActivity.class);
             i.putExtra("username", ArrayListPosts.get(position).getUserName());
             i.putExtra("team", ArrayListPosts.get(position).getTeam());
+            context.startActivity(i);
+        }
+        if(viewId == R.id.tsLikesCounter) {
+            Intent i = new Intent(context, LikersActivity.class);
+            i.putExtra("likers", ArrayListPosts.get(position).getLikes());
             context.startActivity(i);
         }
     }

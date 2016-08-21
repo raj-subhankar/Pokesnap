@@ -32,7 +32,7 @@ public interface ApiInterface {
     //Call<FeedResult> getNewposts(@Query("token") String token);
 
     @GET("posts/top")
-    Call<List<Post>> getMoreTopposts(@Query("lastid") String id,
+    Call<List<Post>> getMoreTopposts(@Query("lastid") int id,
                                      @Query("token") String token);
 
     @GET("posts/all/{username}")

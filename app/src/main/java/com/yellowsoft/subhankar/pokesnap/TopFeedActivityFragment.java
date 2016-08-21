@@ -26,6 +26,7 @@ public class TopFeedActivityFragment extends Fragment {
     private RecyclerView recyclerView;
     private FeedAdapter mAdapter;
     private String token;
+    int page;
     SwipeRefreshLayout mSwipeRefreshLayout;
 
     private static final String TAG = TopFeedActivityFragment.class.getSimpleName();
@@ -39,6 +40,7 @@ public class TopFeedActivityFragment extends Fragment {
 
         session = new SessionManager(getContext());
         token = session.getToken();
+        page = 0;
 
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
@@ -96,7 +98,8 @@ public class TopFeedActivityFragment extends Fragment {
                 // Triggered only when new data needs to be appended to the list
                 // Add whatever code is needed to append new items to the bottom of the list
                 int curSize = mAdapter.getItemCount();
-                customLoadMoreDataFromApi(posts.get(curSize - 1).get_id().toString());
+                page = page + 1;
+                customLoadMoreDataFromApi(page);
             }
         });
 
@@ -133,7 +136,7 @@ public class TopFeedActivityFragment extends Fragment {
 
     }
 
-    public void customLoadMoreDataFromApi(String lastid) {
+    public void customLoadMoreDataFromApi(int lastid) {
 
         ApiInterface apiService =
                 ApiClient.getClient().create(ApiInterface.class);
