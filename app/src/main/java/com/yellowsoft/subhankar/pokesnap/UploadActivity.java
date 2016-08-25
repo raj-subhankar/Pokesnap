@@ -3,6 +3,7 @@ package com.yellowsoft.subhankar.pokesnap;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -35,6 +36,7 @@ public class UploadActivity extends AppCompatActivity {
     Uri photoUri;
     private SessionManager session;
     private ProgressDialog pDialog;
+    private ImageView ivPhoto;
 
     public final static int PICK_PHOTO_CODE = 1046;
 
@@ -42,12 +44,14 @@ public class UploadActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = new Intent(Intent.ACTION_PICK,
+        final Intent intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
         setContentView(R.layout.activity_upload);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        ivPhoto = (ImageView) findViewById(R.id.ivPhoto);
 
         // Progress dialog
         pDialog = new ProgressDialog(this);
@@ -60,11 +64,21 @@ public class UploadActivity extends AppCompatActivity {
             startActivityForResult(intent, PICK_PHOTO_CODE);
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabDone);
+        final FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fabDone);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                fab.setEnabled(false);
                 uploadFile(photoUri);
+            }
+        });
+        ivPhoto.setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (intent.resolveActivity(getPackageManager()) != null) {
+                    // Bring up gallery to select a photo
+                    startActivityForResult(intent, PICK_PHOTO_CODE);
+                }
             }
         });
 
