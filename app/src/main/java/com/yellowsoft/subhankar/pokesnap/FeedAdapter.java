@@ -88,7 +88,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.MyViewHolder> 
         String postedBy = post.getUserName();
         holder.userName.setText(postedBy);
 
-        if(post.getPostBody() != "") {
+        if(post.getPostBody() != null) {
             holder.postBody.setVisibility(View.VISIBLE);
             holder.body.setText(post.getPostBody());
             holder.userName2.setText(postedBy);
