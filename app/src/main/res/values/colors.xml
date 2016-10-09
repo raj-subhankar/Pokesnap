@@ -22,5 +22,7 @@
 
     <color name="album_title">#4c4c4c</color>
 
+    <color name="my_statusbar_color">#484848</color>
+
 
 </resources>
